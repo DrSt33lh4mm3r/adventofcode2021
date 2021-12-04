@@ -1,19 +1,13 @@
 import {LineExtractor} from "./line-extractor";
+import {Puzzle} from "./puzzle";
 
-export class Puzzle_1a {
+export class Puzzle_1b extends Puzzle {
     lines: string[] = [];
     parsedLines: number[] = [];
 
     constructor() {
-        // const inputFile = './input/test_input.txt';
-        const inputFile = './input/1.txt';
-
-        const lineExtractor = new LineExtractor(inputFile);
-        lineExtractor.getLines().subscribe(lines => {
-            if (lines && lines.length > 0) {
-                this.processLines(lines);
-            }
-        });
+        // super('./input/test_input.txt');
+        super('./input/1.txt');
     }
 
     processLines(lines: string[]) {
@@ -40,4 +34,4 @@ export class Puzzle_1a {
     }
 }
 
-new Puzzle_1a();
+new Puzzle_1b();
