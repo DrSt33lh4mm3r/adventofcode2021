@@ -1,5 +1,5 @@
 import {Puzzle} from "./puzzle";
-import {BingoBoard} from "./Helpers/bingo-board";
+import {BingoBoard} from "./helpers/bingo-board";
 
 export class Puzzle_4b extends Puzzle {
     lines: string[] = [];

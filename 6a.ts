@@ -1,5 +1,4 @@
 import {Puzzle} from "./puzzle";
-import {BingoBoard} from "./Helpers/bingo-board";
 
 export class Puzzle_6a extends Puzzle {
     constructor() {
