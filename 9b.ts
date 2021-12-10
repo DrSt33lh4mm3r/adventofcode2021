@@ -1,6 +1,6 @@
 import {Puzzle} from "./puzzle";
 
-export class Puzzle_9a extends Puzzle {
+export class Puzzle_9b extends Puzzle {
     constructor() {
         // super('./input/test_input.txt');
         super('./input/9.txt');
@@ -108,4 +108,4 @@ export class Puzzle_9a extends Puzzle {
     }
 }
 
-new Puzzle_9a();
+new Puzzle_9b();
