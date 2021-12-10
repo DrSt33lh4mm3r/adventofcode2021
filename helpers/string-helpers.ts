@@ -6,3 +6,8 @@ export function removeCharAtIndex(s: string, index: number): string {
         return s;
     }
 }
+
+export function replaceAll(s: string, find: string, replace: string) {
+    const parts = s.split(find);
+    return parts.join(replace);
+}
