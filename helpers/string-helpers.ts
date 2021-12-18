@@ -11,3 +11,7 @@ export function replaceAll(s: string, find: string, replace: string) {
     const parts = s.split(find);
     return parts.join(replace);
 }
+
+export function isAllUpperCase(str: string) {
+    return str == str.toUpperCase();
+}

@@ -6,6 +6,16 @@ export function incrementForKey<T>(m: Map<T, number>, key: T, defaultValue: numb
     }
 }
 
+export function addToArray<T, U>(m: Map<T, U[]>, key: T, value: U) {
+    if (m.has(key)) {
+        const prev = m.get(key)!;
+        prev.push(value);
+        m.set(key, prev);
+    } else {
+        m.set(key, [value]);
+    }
+}
+
 export function reverseMap<T, U>(m: Map<T, U>): Map<U, T> {
     const reversed: Map<U, T> = new Map<U, T>();
 
