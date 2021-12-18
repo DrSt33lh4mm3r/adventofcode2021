@@ -10,8 +10,6 @@ export class Puzzle_8b extends Puzzle {
         super('./input/8.txt');
     }
 
-    // git config --global user.email "alexander.gruetzner@googlemail.com"
-
     processLines(lines: string[]) {
         this.digits.set('abcefg', 0);
         this.digits.set('cf', 1);
