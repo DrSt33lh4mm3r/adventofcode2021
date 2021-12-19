@@ -2,7 +2,7 @@ import {Puzzle} from "./puzzle";
 import {mergeBinaryStrings, replaceCharAtIndex, reverseString} from "./helpers/string-helpers";
 import {addForKey, incrementForKey} from "./helpers/map-helpers";
 
-export class Puzzle_14a extends Puzzle {
+export class Puzzle_14b extends Puzzle {
     constructor() {
         super('./input/test_input.txt');
         // super('./input/14.txt');
@@ -66,4 +66,4 @@ export class Puzzle_14a extends Puzzle {
 
 
 
-new Puzzle_14a();
+new Puzzle_14b();
