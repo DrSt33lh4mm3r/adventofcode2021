@@ -1,170 +1,119 @@
 import {Puzzle} from "./puzzle";
 import {Printable, PriorityQueue} from "./helpers/priority-queue";
 
-export class Puzzle_15b extends Puzzle {
-    riskLevel: number[][] = [];
-    totalRisk: number[][] = [];
-
-    maxX = 0;
-    maxY = 0;
-
-    openList: PriorityQueue<Point> = new PriorityQueue<Point>()
-    closedList: Set<string> = new Set<string>();
+export class Puzzle_16a extends Puzzle {
+    packages: Packet[] = [];
+    sum: number = 0;
 
     constructor() {
         // super('./input/test_input.txt');
-        super('./input/15.txt');
+        super('./input/16.txt');
     }
 
     processLines(lines: string[]) {
-        const tempRiskLevel: number[][] = [];
+        const binary = this.extractBinary(lines[0]);
 
-        for (let i = 0; i < lines.length; i++) {
-            let line: number[] = [];
+        this.extractPackets(binary);
 
-            const rawLine = lines[i].split('').map(n => Number.parseInt(n));
-
-            for (let j = 0; j < 5; j++) {
-                const updatedLine = rawLine.map(n => Puzzle_15b.increment(n, j))
-                line = line.concat(updatedLine)
-            }
-
-            tempRiskLevel.push(line);
-            this.maxX = line.length - 1;
-        }
-
-        for (let j = 0; j < 5; j++) {
-            for (let i = 0; i < tempRiskLevel.length; i++) {
-                const rawLine = tempRiskLevel[i];
-                const updatedLine = rawLine.map(n => Puzzle_15b.increment(n, j))
-
-                // console.log({rawLine, updatedLine})
-
-                this.riskLevel.push(updatedLine);
-                this.totalRisk.push(updatedLine.map(n => Number.MAX_SAFE_INTEGER));
-            }
-        }
-
-        this.maxY = this.riskLevel.length - 1;
-
-        this.totalRisk[0][0] = 0;
-
-        this.aStar();
-
-        console.log(this.totalRisk[this.maxY][this.maxX])
-        // console.log(this.closedList)
+        console.log(this.sum)
     }
 
-    aStar() {
-        this.openList.enqueue(new Point(0, 0), 0);
-
-        while (this.openList.size() > 0) {
-            const currentNode = this.openList.removeMin()!;
-
-            if (currentNode.x === this.maxX && currentNode.y === this.maxY) {
-                return;
-            }
-
-            // console.log('adding to closedList');
-            this.closedList.add(currentNode.toString());
-
-            this.expandNode(currentNode);
+    extractPackets(binary: string) {
+        if (binary.length < 11) {
+            return;
         }
-    }
 
+        const version = binary.substr(0, 3);
+        const typeId = binary.substr(3, 3);
+        let payload = binary.substr(6)
 
-    private expandNode(currentNode: Point) {
-        // console.log({currentNode})
-        const successors = this.getAllSuccessors(currentNode);
+        this.packages.push({binary, version, typeId});
 
-        for (let i = 0; i < successors.length; i++) {
-            const successor = successors[i];
+        this.sum = this.sum + Number.parseInt(version, 2);
 
-            // console.log({successor})
+        if (typeId === '100') {
+            // literal value
+            let rawData: string = '';
+            let reachedEnd: boolean = false;
+            let rest: string = ''
 
-            if (this.closedList.has(successor.toString())) {
-                // console.log('continue because successor is allready closed')
-                // const s = successor.toString();
-                // console.log(s)
-                // console.log(Array.from(this.closedList.values()))
-                continue;
+            while (!reachedEnd) {
+                const groupHeader = payload.substr(0, 1)
+                const nibble = payload.substr(1, 4);
+                rest = payload.substr(5);
+
+                if (groupHeader === '0') {
+                    // last group
+                    reachedEnd = true;
+                }
+
+                rawData = rawData + nibble;
+
+                payload = rest;
             }
 
-            const tentative_g = this.totalRisk[currentNode.y][currentNode.x]
-                + this.riskLevel[successor.y][successor.x];
+            const literalValue = Number.parseInt(rawData, 2);
+            console.log('Literal Value: ' + literalValue);
 
-            if (this.openList.contains(successor) && tentative_g >= this.totalRisk[successor.y][successor.x]) {
-                continue;
-            }
+            this.extractPackets(rest);
+        } else {
+            // operator
+            const lengthTypeId = payload.substr(0, 1);
 
-            this.totalRisk[successor.y][successor.x] = tentative_g;
+            if (lengthTypeId === '0') {
+                // next 15 bits are one number, representing the total length in bits of contained sub-packets
+                const lengthOfSubPackets = Number.parseInt(payload.substr(1, 15), 2);
 
-            const f = tentative_g; // what the fuck is h(successor)??
+                const subPackets = payload.substr(16, lengthOfSubPackets);
+                const rest = payload.substr(16 + lengthOfSubPackets);
 
-            // console.log({successor, tentative_g, f})
+                console.log('Operator: LengthTypeId 0; length: ' + lengthOfSubPackets
+                    + '; sub-packets: ' + subPackets + '; rest: ' + rest)
 
-            if (this.openList.contains(successor)) {
-                this.openList.updateKey(successor, f);
+                this.extractPackets(subPackets);
+                this.extractPackets(rest);
             } else {
-                this.openList.enqueue(successor, f);
+                // next 11 bits are one number, representing the number of contained sub-packets
+                const numberOfSubPackets = Number.parseInt(payload.substr(1, 11), 2);
+
+                const subPackets = payload.substr(12);
+
+                console.log('Operator: LengthTypeId 1; number of packets: ' + numberOfSubPackets
+                    + '; sub-packets: ' + subPackets);
+
+                this.extractPackets(subPackets);
             }
+
+            // this.extractPackages(payload);
         }
     }
 
-    private getAllSuccessors(p: Point) {
-        const successors: Point[] = [];
+    extractBinary(line: string): string {
+        let binary: string = '';
 
-        // up
-        if (p.y - 1 >= 0) {
-            successors.push(new Point(p.x, p.y - 1))
+        for (let i = 0; i < line.length; i++) {
+            const c = line[i];
+            binary = binary + this.hexToBinary(c);
         }
 
-        // down
-        if (p.y + 1 <= this.maxY) {
-            successors.push(new Point(p.x, p.y + 1))
-        }
-
-        // left
-        if (p.x - 1 >= 0) {
-            successors.push(new Point(p.x - 1, p.y))
-        }
-
-        // right
-        if (p.x + 1 <= this.maxX) {
-            successors.push(new Point(p.x + 1, p.y))
-        }
-
-        return successors;
+        return binary;
     }
 
-    static increment(n: number, j: number): number {
-        n = (n + j) % 9
+    hexToBinary(n: string, length: number = 4): string {
+        let b = Number.parseInt(n, 16).toString(2);
 
-        if (n === 0) {
-            n = 9
+        while (b.length < length) {
+            b = '0' + b;
         }
 
-        return n;
-
+        return b;
     }
 }
 
-export class Point extends Printable {
-    x: number;
-    y: number;
-
-
-    constructor(x: number, y: number) {
-        super();
-        this.x = x;
-        this.y = y;
-    }
-
-
-    toString(): string {
-        return '' + this.x.toString() + '|' + this.y.toString();
-    }
+interface Packet {
+    binary: string;
+    version: string;
+    typeId: string;
 }
 
-
-new Puzzle_15b();
+new Puzzle_16a();
